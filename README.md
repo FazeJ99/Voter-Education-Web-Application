@@ -1,4 +1,3 @@
-```markdown
 # VoterEdu Kenya 🇰🇪
 
 > **Vote based on facts, not noise.** An independent, transparent, and verified civic education platform empowering Kenyan citizens ahead of the 2027 General Elections.
@@ -151,4 +150,3 @@ The backend exposes a runtime health and metrics endpoint protected by API authe
 ## 📄 License & Attribution
 
 This project is developed for educational and civic transparency purposes.
-```
