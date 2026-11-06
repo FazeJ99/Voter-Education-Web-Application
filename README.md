@@ -2,8 +2,9 @@
 
 > **Vote based on facts, not noise.** An independent, transparent, and verified civic education platform empowering Kenyan citizens ahead of the 2027 General Elections.
 
----
+![VoterEdu Demo](assets/voteredu-demo.gif)
 
+---
 ## 📌 Overview
 
 During election cycles, public discourse often becomes cluttered with viral misinformation, rhetoric, and polarized debates. **VoterEdu** is engineered to eliminate voter confusion by providing a single, reliable hub for electoral transparency. 
