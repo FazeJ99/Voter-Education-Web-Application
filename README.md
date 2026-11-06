@@ -1,102 +1,143 @@
-# Voter Guide API
+```markdown
+# VoterEdu Kenya 🇰🇪
 
-An API that lists Kenyan presidential candidates with their policy positions and lets voters read and post reviews. Built for front-end developers making a voter info app.
+> **Vote based on facts, not noise.** An independent, transparent, and verified civic education platform empowering Kenyan citizens ahead of the 2027 General Elections[cite: 3].
 
-**Base URL:** `https://iap-group11.onrender.com`
-(Free hosting: if idle, the first request can take ~50 seconds. Wait and retry.)
+---
 
-**Auth:** none for now. All endpoints are public.
+## 📌 Overview
 
-**Candidate ids:** `ruto`, `kalonzo`, `matiangi`, `maraga`
+During election cycles, public discourse often becomes cluttered with viral misinformation, rhetoric, and polarized debates. **VoterEdu** is engineered to eliminate voter confusion by providing a single, reliable hub for electoral transparency. 
 
-## Quickstart
+Built as a responsive web application backed by resilient APIs, VoterEdu allows Kenyan voters to examine candidates' concrete track records, scrutinize policy manifestos against key socio-economic pillars, read verified peer reviews, track civic events, and plan their travel logistics to polling stations seamlessly[cite: 1, 2, 8, 12].
 
-```
-curl https://iap-group11.onrender.com/api/candidates
-```
+---
 
-## Endpoints
+## 🗳️ Impact on the 2027 General Elections
 
-**GET /api/candidates** returns all candidates.
-```
-curl https://iap-group11.onrender.com/api/candidates
-```
-→ `200` `[{ "id": "ruto", "name": "Dr. William Ruto", "party": "Kenya Kwanza Alliance / UDA", "average_rating": 2.3, "review_count": 3, ... }]`
-(Each candidate also has `initials`, `description`, `experience`, `vision`, `fiscal`, `agriculture`, `governance`, `cost_of_living`. `average_rating` is `null` if there are no reviews.)
+- **Combating Misinformation & Polarized Echo Chambers:** Delivers structured, sourced manifesto stances across critical public interest issues (fiscal policy, governance, agriculture, and cost of living) rather than viral soundbites[cite: 1, 3].
+- **Accountability & Public Scorecards:** Features voter review logs with interactive rating matrices, enabling communities to leave qualitative reviews and score candidates on integrity, performance, and transparency[cite: 2, 8].
+- **Logistical Accessibility & Turnout Enhancement:** Integrates with local transit estimates, ensuring voters can budget and map routes to polling centers to reduce election-day absenteeism[cite: 8, 12].
+- **Civic Mobilization:** Aggregates verified town halls, policy addresses, and campaign rallies so voters can engage candidates directly across key venues[cite: 8].
 
-**GET /api/candidates/:id** returns one candidate.
-```
-curl https://iap-group11.onrender.com/api/candidates/ruto
-```
-→ `200` a single candidate object (same fields as above)
+---
 
-**GET /api/candidates/:id/reviews** returns reviews, newest first (`[]` if none). Optional query `minRating` (integer 1 to 5) returns only reviews with a rating greater than or equal to it.
-```
-curl "https://iap-group11.onrender.com/api/candidates/ruto/reviews?minRating=4"
-```
-→ `200`
-```json
-[{"id":1,"candidate_id":"ruto","user":"Anonymous Voter","rating":4,"text":"Clear focus on devolution structural systems, but need more clarity on agricultural subsidy time-tables.","date":"2026-06-25"}]
-```
+## ✨ Key Features
 
-**POST /api/candidates/:id/reviews** creates a review. Body: `rating` (integer 1 to 5, required), `text` (non-empty string, required), `user` (string, optional, defaults to "Anonymous Voter").
-```
-curl -X POST https://iap-group11.onrender.com/api/candidates/maraga/reviews -H "Content-Type: application/json" -d '{"user":"Wanjiku","rating":4,"text":"Clear plan on judicial reform."}'
-```
-→ `201`
-```json
-{"id":4,"candidate_id":"maraga","user":"Wanjiku","rating":4,"text":"Clear plan on judicial reform.","date":"2026-10-19"}
-```
+- **Candidate Profiles & Manifesto Matrix:** Comprehensive profiles containing candidate bios, coalition affiliations, verified badges, and structured breakdowns across key pillars[cite: 1]:
+  - *Experience & Track Record*[cite: 1]
+  - *Core Vision Statement*[cite: 1]
+  - *Taxation & Fiscal Policy*[cite: 1]
+  - *Agriculture & Food Security*[cite: 1]
+  - *Governance & Devolution*[cite: 1]
+  - *Cost of Living Mitigation*[cite: 1]
+- **Candidate Review Logs & Trust Scoring:** Interactive review logging enabling verified citizens to submit structured ratings (1–5 stars) and critical verdicts[cite: 8].
+- **Side-by-Side Candidate Comparison:** Matrix view to evaluate two or more candidates head-to-head on key election themes[cite: 3].
+- **Polling Station Locator & Ride Fare Estimator:** Integrated route planner connecting local landmarks with polling stations, calculating travel time (ETA) and estimated fares (Boda, Standard, XL) across multiple providers[cite: 8, 12].
+- **Upcoming Civic Events & Rallies Feed:** Real-time stream of county town halls, presidential debates, and public interest dialogues with venue, time, and expected crowd capacity details[cite: 8].
+- **Resilient & Observable Architecture:** Built with partner API resilience (exponential backoff, in-memory graceful fallbacks, and stale-data indicators) alongside low-overhead request monitoring and health metrics[cite: 6, 7, 8, 16].
 
-(Windows PowerShell users: use `curl.exe`, and put the JSON body in a file, then pass `--data-binary "@body.json"`.)
+---
 
-## Errors
+## 🛠️ Architecture & Tech Stack
 
-Every error returns JSON in the form `{ "code": "...", "message": "..." }`.
+- **Frontend:** React.js, React-Bootstrap, React Router, HTML5/CSS3
+- **Backend / API Proxy:** Node.js, Express.js[cite: 5, 8]
+- **Database / Cache:** SQLite (`better-sqlite3`), In-Memory Resilience Fallback Cache[cite: 8]
+- **Security & Resilience:** 
+  - Token-safe API Key Authentication (`X-API-Key` with SHA-256 fingerprinting)[cite: 8, 18]
+  - In-memory rate limiting with `Retry-After` headers[cite: 8]
+  - Resilient HTTP client wrapper (`resilientFetch`) featuring timeout safeguards (1.5s) and exponential backoff retry logic[cite: 6, 7]
+- **Observability:** Custom lightweight performance monitoring middleware with a protected `/stats` metrics endpoint[cite: 18, 20]
 
-| Request | Status | Body |
-|---|---|---|
-| `GET /api/candidates/nobody` (unknown candidate, also on `/reviews` GET and POST) | 404 | `{ "code": "NOT_FOUND", "message": "Candidate not found" }` |
-| `GET .../reviews?minRating=abc` (not an integer from 1 to 5) | 400 | `{ "code": "INVALID_PARAMETER", "message": "minRating must be an integer between 1 and 5" }` |
-| POST missing `rating` or `text` | 400 | `{ "code": "INVALID_REVIEW", "message": "rating and text are required" }` |
-| POST with `rating` outside 1 to 5 or not an integer | 400 | `{ "code": "INVALID_REVIEW", "message": "rating must be an integer between 1 and 5" }` |
+---
 
-## Run locally
+## 🚀 Getting Started
 
-Needs Node.js 18+.
-```
-git clone https://github.com/ethanmuttai/IAP_group11.git
+### Prerequisites
+
+- Node.js (v18.0.0 or higher)[cite: 5]
+- npm or yarn
+
+### 1. Clone the Repository
+
+```bash
+git clone [https://github.com/ethanmuttai/IAP_group11.git](https://github.com/ethanmuttai/IAP_group11.git)
 cd IAP_group11/voter.fs
-npm install
-node db/init-db.js
-node db/server.js
+
 ```
-Runs at `http://localhost:5000`.
 
-## Monitoring & Observability (`/stats`)
+### 2. Install Dependencies
 
-The backend exposes a runtime health and metrics endpoint protected by API authentication.
+```bash
+npm install
 
-- **Endpoint:** `GET /stats`
-- **Headers:** `X-API-Key: <your-api-key>`
+```
+
+### 3. Environment Variables Configuration
+
+Create a `.env` file in the root backend directory:
+
+```env
+PORT=5000
+API_KEYS=<your-internal-client-key>,<partner-consumer-key>
+MY_API_KEY=<your-primary-key>
+PARTNER_URL=[https://demand-flat-says-protocol.trycloudflare.com](https://demand-flat-says-protocol.trycloudflare.com)
+PARTNER_API_KEY=<upstream-partner-key>
+
+```
+
+### 4. Running the Application
+
+In separate terminal windows:
+
+**Start the Express API server:**
+
+```bash
+node db/server.js
+
+```
+
+**Start the React frontend application:**
+
+```bash
+npm start
+
+```
+
+Access the user interface at `http://localhost:3000`.
+
+---
+
+## 📊 Monitoring & Observability (`/stats`)
+
+The backend exposes a runtime health and metrics endpoint protected by API authentication:
+
+* **Endpoint:** `GET /stats`
+
+
+* **Headers:** `X-API-Key: <your-api-key>`
+
+
 
 ### Example Response:
+
 ```json
 {
   "startedAt": "2026-11-06T10:22:46.926Z",
-  "uptimeSeconds": 59,
+  "uptimeSeconds": 120,
   "total": 60,
   "clientErrors": 29,
   "serverErrors": 0,
   "errorRatePercent": 0,
   "avgMs": 1.3,
   "routes": {
-    "GET (no route)": {
-      "count": 25,
-      "clientErrors": 25,
+    "GET /api/candidates": {
+      "count": 16,
+      "clientErrors": 0,
       "serverErrors": 0,
-      "avgMs": 0.9,
-      "maxMs": 6.2
+      "avgMs": 1.6,
+      "maxMs": 2.3
     },
     "GET /api/candidates/:candidateId": {
       "count": 13,
@@ -111,13 +152,18 @@ The backend exposes a runtime health and metrics endpoint protected by API authe
       "serverErrors": 0,
       "avgMs": 1.1,
       "maxMs": 1.5
-    },
-    "GET /api/candidates": {
-      "count": 16,
-      "clientErrors": 0,
-      "serverErrors": 0,
-      "avgMs": 1.6,
-      "maxMs": 2.3
     }
   }
 }
+
+```
+
+---
+
+## 📄 License & Attribution
+
+This project is developed for educational and civic transparency purposes as part of the Strathmore University Internet Application Programming curriculum (Group 11).
+
+```
+
+```
